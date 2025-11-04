@@ -1,0 +1,31 @@
+import { type NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
+
+export async function GET(request: NextRequest) {
+  try {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get("telegram_session")
+
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Call your Railway backend API
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000"
+    const response = await fetch(`${backendUrl}/api/activity-chart`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken.value}`,
+      },
+    })
+
+    if (!response.ok) {
+      return NextResponse.json({ error: "Failed to fetch chart data" }, { status: response.status })
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error("[v0] Activity chart error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
