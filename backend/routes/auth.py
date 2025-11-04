@@ -40,7 +40,6 @@ async def sign_in(request: SignInRequest):
                 "success": False
             }
         
-        # Start listening for events
         session = storage.get_session(session_token)
         if session:
             asyncio.create_task(register_all_handlers(session["client"], session_token))
@@ -78,6 +77,34 @@ async def sign_in_password(
         raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/status")
+async def get_status(session_token: str = Depends(get_session_token)):
+    """Check if session is still valid and get user info"""
+    try:
+        session = storage.get_session(session_token)
+        if not session:
+            raise HTTPException(status_code=401, detail="Session not found")
+        
+        client = session["client"]
+        if not client.is_connected():
+            await client.connect()
+        
+        me = await client.get_me()
+        
+        return {
+            "connected": True,
+            "user": {
+                "id": me.id,
+                "firstName": me.first_name,
+                "lastName": me.last_name,
+                "username": me.username,
+                "phone": me.phone
+            }
+        }
+    except Exception as e:
+        print(f"[v0] Status check error: {e}")
+        raise HTTPException(status_code=401, detail="Session invalid")
 
 @router.post("/logout")
 async def logout(session_token: str = Depends(get_session_token)):

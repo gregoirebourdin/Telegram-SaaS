@@ -13,21 +13,21 @@ export async function GET(request: NextRequest) {
     // Ensure URL has protocol
     const fullBackendUrl = backendUrl.startsWith("http") ? backendUrl : `https://${backendUrl}`
 
-    const response = await fetch(`${fullBackendUrl}/api/stats`, {
+    const response = await fetch(`${fullBackendUrl}/api/status`, {
       headers: {
         "X-Session-Token": sessionToken,
       },
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Failed to fetch stats" }))
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
       return NextResponse.json(errorData, { status: response.status })
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("[v0] Stats error:", error)
+    console.error("[v0] Status check error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

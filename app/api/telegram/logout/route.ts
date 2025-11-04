@@ -1,10 +1,30 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { type NextRequest, NextResponse } from "next/server"
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    cookieStore.delete("telegram_session")
+    const sessionToken = request.headers.get("X-Session-Token")
+
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080"
+
+    // Ensure URL has protocol
+    const fullBackendUrl = backendUrl.startsWith("http") ? backendUrl : `https://${backendUrl}`
+
+    // Call backend logout to cleanup session
+    const response = await fetch(`${fullBackendUrl}/api/logout`, {
+      method: "POST",
+      headers: {
+        "X-Session-Token": sessionToken,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Logout failed" }))
+      return NextResponse.json(errorData, { status: response.status })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

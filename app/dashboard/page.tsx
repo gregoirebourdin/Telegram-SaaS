@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LogOut, MessageSquare, Users, Radio, Loader2, RefreshCw, User } from "lucide-react"
 import { ApiClient } from "@/lib/api-client"
+import { SessionManager } from "@/lib/session-manager"
 import type { ActivityResponse } from "@/types/telegram"
 
 export default function DashboardPage() {
@@ -17,6 +18,27 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    const checkSession = async () => {
+      if (!SessionManager.hasSession()) {
+        router.push("/auth")
+        return
+      }
+
+      try {
+        // Verify session is still valid
+        await ApiClient.checkStatus()
+        fetchActivity()
+      } catch (err) {
+        // Session invalid, redirect to auth
+        SessionManager.clearSession()
+        router.push("/auth")
+      }
+    }
+
+    checkSession()
+  }, [router])
 
   const fetchActivity = async (isRefresh = false) => {
     if (isRefresh) {
@@ -40,10 +62,6 @@ export default function DashboardPage() {
       setRefreshing(false)
     }
   }
-
-  useEffect(() => {
-    fetchActivity()
-  }, [])
 
   const handleLogout = async () => {
     try {
