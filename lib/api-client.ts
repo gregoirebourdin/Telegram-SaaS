@@ -51,7 +51,7 @@ export class ApiClient {
   }
 
   static async getActivity(): Promise<ActivityResponse> {
-    return this.request<ActivityResponse>("/api/telegram/stats")
+    return this.request<ActivityResponse>("/api/telegram/dashboard")
   }
 
   static async logout(): Promise<AuthResponse> {

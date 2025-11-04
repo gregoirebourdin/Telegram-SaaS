@@ -19,19 +19,31 @@ class MessageHandler:
                 sender = await event.get_sender()
                 chat = await event.get_chat()
                 
-                # Determine sender name
-                sender_name = "Unknown"
-                if hasattr(sender, 'username') and sender.username:
-                    sender_name = sender.username
-                elif hasattr(sender, 'first_name') and sender.first_name:
-                    sender_name = sender.first_name
-                
-                # Determine chat name
+                # Determine chat name - for private chats, use sender's name
                 chat_name = "Unknown"
+                
+                # Try to get chat title first (for groups/channels)
                 if hasattr(chat, 'title') and chat.title:
                     chat_name = chat.title
+                # For private chats, use the other person's name
+                elif hasattr(sender, 'first_name'):
+                    chat_name = sender.first_name
+                    if hasattr(sender, 'last_name') and sender.last_name:
+                        chat_name += f" {sender.last_name}"
+                # Fallback to username
+                elif hasattr(sender, 'username') and sender.username:
+                    chat_name = f"@{sender.username}"
                 elif hasattr(chat, 'username') and chat.username:
-                    chat_name = chat.username
+                    chat_name = f"@{chat.username}"
+                
+                # Determine sender name
+                sender_name = "Unknown"
+                if hasattr(sender, 'first_name') and sender.first_name:
+                    sender_name = sender.first_name
+                    if hasattr(sender, 'last_name') and sender.last_name:
+                        sender_name += f" {sender.last_name}"
+                elif hasattr(sender, 'username') and sender.username:
+                    sender_name = f"@{sender.username}"
                 
                 # Create activity
                 activity = {
