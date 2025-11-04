@@ -3,7 +3,7 @@ from telethon import events
 from telethon import TelegramClient
 from datetime import datetime
 
-from backend.storage import storage
+from storage import storage
 
 class MessageHandler:
     """Handles new message events from Telegram"""

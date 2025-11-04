@@ -2,11 +2,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 
-from backend.models import PhoneRequest, SignInRequest, PasswordRequest
-from backend.services.telegram_service import telegram_service
-from backend.events import register_all_handlers
-from backend.storage import storage
-from backend.routes.dependencies import get_session_token
+from models import PhoneRequest, SignInRequest, PasswordRequest
+from services.telegram_service import telegram_service
+from events import register_all_handlers
+from storage import storage
+from routes.dependencies import get_session_token
 import asyncio
 
 router = APIRouter(prefix="/api", tags=["auth"])

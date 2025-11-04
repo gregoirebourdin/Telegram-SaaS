@@ -8,7 +8,7 @@ from telethon.tl.types import (
 )
 from datetime import datetime
 
-from backend.storage import storage
+from storage import storage
 
 class GroupHandler:
     """Handles group member join/leave events"""

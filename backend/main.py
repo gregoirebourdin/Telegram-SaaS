@@ -2,8 +2,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.config import settings
-from backend.routes import register_routes
+from config import settings
+from routes import register_routes
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -36,7 +36,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Railway"""
-    from backend.storage import storage
+    from storage import storage
     return {
         "status": "healthy",
         "api_configured": bool(settings.TELEGRAM_API_ID and settings.TELEGRAM_API_HASH),

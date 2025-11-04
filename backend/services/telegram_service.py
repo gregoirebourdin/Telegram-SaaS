@@ -5,8 +5,8 @@ from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError
 from typing import Tuple, Optional
 import secrets
 
-from backend.config import settings
-from backend.storage import storage
+from config import settings
+from storage import storage
 
 class TelegramService:
     """Service for managing Telegram client operations"""

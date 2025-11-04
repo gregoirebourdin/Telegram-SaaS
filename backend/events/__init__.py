@@ -1,6 +1,6 @@
 """Event handlers initialization"""
-from backend.events.message_handler import MessageHandler
-from backend.events.group_handler import GroupHandler
+from events.message_handler import MessageHandler
+from events.group_handler import GroupHandler
 from telethon import TelegramClient
 import asyncio
 

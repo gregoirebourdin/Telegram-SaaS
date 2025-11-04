@@ -2,9 +2,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timedelta
 
-from backend.services.telegram_service import telegram_service
-from backend.storage import storage
-from backend.routes.dependencies import get_session_token
+from services.telegram_service import telegram_service
+from storage import storage
+from routes.dependencies import get_session_token
 
 router = APIRouter(prefix="/api", tags=["stats"])
 
