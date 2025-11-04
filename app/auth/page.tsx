@@ -20,11 +20,13 @@ export default function AuthPage() {
   const [phoneCodeHash, setPhoneCodeHash] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [errorDetails, setErrorDetails] = useState<{ details?: string; backendUrl?: string } | null>(null)
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setErrorDetails(null)
 
     try {
       const data = await ApiClient.sendVerificationCode(phoneNumber)
@@ -34,7 +36,20 @@ export default function AuthPage() {
         setStep("code")
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      if (err instanceof Error) {
+        try {
+          const errorData = JSON.parse(err.message)
+          setError(errorData.error || "An error occurred")
+          setErrorDetails({
+            details: errorData.details,
+            backendUrl: errorData.backendUrl,
+          })
+        } catch {
+          setError(err.message)
+        }
+      } else {
+        setError("An error occurred")
+      }
     } finally {
       setLoading(false)
     }
@@ -44,12 +59,26 @@ export default function AuthPage() {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setErrorDetails(null)
 
     try {
       await ApiClient.verifyCode(phoneNumber, code, phoneCodeHash)
       router.push("/dashboard")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      if (err instanceof Error) {
+        try {
+          const errorData = JSON.parse(err.message)
+          setError(errorData.error || "An error occurred")
+          setErrorDetails({
+            details: errorData.details,
+            backendUrl: errorData.backendUrl,
+          })
+        } catch {
+          setError(err.message)
+        }
+      } else {
+        setError("An error occurred")
+      }
     } finally {
       setLoading(false)
     }
@@ -74,7 +103,15 @@ export default function AuthPage() {
         <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p className="font-medium">{error}</p>
+                  {errorDetails?.details && <p className="text-sm opacity-90">{errorDetails.details}</p>}
+                  {errorDetails?.backendUrl && (
+                    <p className="text-xs opacity-75 font-mono break-all">Backend: {errorDetails.backendUrl}</p>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 
