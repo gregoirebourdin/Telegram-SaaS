@@ -9,6 +9,10 @@ class Settings:
     TELEGRAM_API_ID: int
     TELEGRAM_API_HASH: str
     
+    # Chatbase configuration
+    CHATBASE_API_KEY: Optional[str] = None
+    CHATBASE_CHATBOT_ID: Optional[str] = None
+    
     # Server configuration
     PORT: int = 8080
     HOST: str = "0.0.0.0"
@@ -27,6 +31,9 @@ class Settings:
         self.TELEGRAM_API_ID = int(api_id)
         self.TELEGRAM_API_HASH = api_hash
         self.PORT = int(os.getenv("PORT", 8080))
+        
+        self.CHATBASE_API_KEY = os.getenv("CHATBASE_API_KEY")
+        self.CHATBASE_CHATBOT_ID = os.getenv("CHATBASE_CHATBOT_ID")
 
 # Global settings instance
 settings = Settings()

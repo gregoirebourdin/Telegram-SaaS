@@ -10,6 +10,7 @@ class Storage:
         self.active_sessions: Dict[str, dict] = {}
         self.activities_store: Dict[str, List[dict]] = {}
         self.string_sessions: Dict[str, str] = {}
+        self.conversation_history: Dict[str, Dict[str, List[dict]]] = {}
     
     def store_client(self, phone: str, client: TelegramClient):
         """Store a temporary client during authentication"""
@@ -48,6 +49,27 @@ class Storage:
         """Get activities for a session"""
         return self.activities_store.get(token, [])
     
+    def add_message_to_history(self, token: str, chat_id: str, role: str, content: str):
+        """Add a message to conversation history"""
+        if token not in self.conversation_history:
+            self.conversation_history[token] = {}
+        if chat_id not in self.conversation_history[token]:
+            self.conversation_history[token][chat_id] = []
+        
+        self.conversation_history[token][chat_id].append({
+            "role": role,
+            "content": content
+        })
+        
+        # Keep only last 50 messages per chat
+        self.conversation_history[token][chat_id] = self.conversation_history[token][chat_id][-50:]
+    
+    def get_conversation_history(self, token: str, chat_id: str) -> List[dict]:
+        """Get conversation history for a specific chat"""
+        if token in self.conversation_history and chat_id in self.conversation_history[token]:
+            return self.conversation_history[token][chat_id]
+        return []
+    
     async def cleanup_session(self, token: str):
         """Cleanup a session and disconnect client"""
         session = self.active_sessions.get(token)
@@ -59,6 +81,8 @@ class Storage:
                 del self.activities_store[token]
             if token in self.string_sessions:
                 del self.string_sessions[token]
+            if token in self.conversation_history:
+                del self.conversation_history[token]
 
 # Global storage instance
 storage = Storage()
