@@ -58,6 +58,15 @@ async def root():
     """Health check endpoint"""
     return {"status": "ok", "message": "Telegram Activity Monitor API"}
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Railway"""
+    return {
+        "status": "healthy",
+        "api_configured": bool(API_ID and API_HASH),
+        "active_sessions": len(active_sessions)
+    }
+
 @app.post("/api/send-code")
 async def send_code(request: PhoneRequest):
     """Send verification code to phone number"""
