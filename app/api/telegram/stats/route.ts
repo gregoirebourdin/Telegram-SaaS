@@ -10,8 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Call your Railway backend API
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000"
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080"
     const response = await fetch(`${backendUrl}/api/stats`, {
       headers: {
         Authorization: `Bearer ${sessionToken.value}`,

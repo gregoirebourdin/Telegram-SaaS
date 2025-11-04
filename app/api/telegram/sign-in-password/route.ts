@@ -9,8 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Password is required" }, { status: 400 })
     }
 
-    // Call your Railway backend API
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000"
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080"
     const response = await fetch(`${backendUrl}/api/sign-in-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError
 from telethon.tl.functions.messages import GetDialogsRequest
 from telethon.tl.types import InputPeerEmpty
@@ -33,6 +34,7 @@ if not API_ID or not API_HASH:
 active_clients = {}
 active_sessions = {}
 activities_store = {}
+string_sessions = {}
 
 class PhoneRequest(BaseModel):
     phone: str
@@ -60,7 +62,7 @@ async def root():
 async def send_code(request: PhoneRequest):
     """Send verification code to phone number"""
     try:
-        client = TelegramClient(f"session_{request.phone}", API_ID, API_HASH)
+        client = TelegramClient(StringSession(), API_ID, API_HASH)
         await client.connect()
         
         result = await client.send_code_request(request.phone)
@@ -73,6 +75,7 @@ async def send_code(request: PhoneRequest):
             "success": True
         }
     except Exception as e:
+        print(f"Error sending code: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/sign-in")
@@ -86,12 +89,16 @@ async def sign_in(request: SignInRequest):
         try:
             await client.sign_in(request.phone, request.code, phone_code_hash=request.phoneCodeHash)
             
+            session_string = client.session.save()
+            
             # Generate session token
             session_token = secrets.token_urlsafe(32)
             active_sessions[session_token] = {
                 "phone": request.phone,
                 "client": client
             }
+            
+            string_sessions[session_token] = session_string
             
             # Initialize activities store
             activities_store[session_token] = []
@@ -112,6 +119,7 @@ async def sign_in(request: SignInRequest):
             raise HTTPException(status_code=400, detail="Invalid verification code")
             
     except Exception as e:
+        print(f"Error signing in: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/sign-in-password")
@@ -243,6 +251,8 @@ async def logout(session_token: str = Depends(get_session_token)):
             del active_sessions[session_token]
             if session_token in activities_store:
                 del activities_store[session_token]
+            if session_token in string_sessions:
+                del string_sessions[session_token]
         
         return {"success": True}
     except Exception as e:
@@ -250,4 +260,4 @@ async def logout(session_token: str = Depends(get_session_token)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
