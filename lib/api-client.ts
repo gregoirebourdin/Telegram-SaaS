@@ -20,25 +20,25 @@ export class ApiClient {
   }
 
   static async sendVerificationCode(phoneNumber: string): Promise<AuthResponse> {
-    return this.request<AuthResponse>("/api/auth/send-code", {
+    return this.request<AuthResponse>("/api/telegram/send-code", {
       method: "POST",
-      body: JSON.stringify({ phoneNumber }),
+      body: JSON.stringify({ phone: phoneNumber }),
     })
   }
 
   static async verifyCode(phoneNumber: string, code: string, phoneCodeHash: string): Promise<AuthResponse> {
-    return this.request<AuthResponse>("/api/auth/verify-code", {
+    return this.request<AuthResponse>("/api/telegram/sign-in", {
       method: "POST",
-      body: JSON.stringify({ phoneNumber, code, phoneCodeHash }),
+      body: JSON.stringify({ phone: phoneNumber, code, phoneCodeHash }),
     })
   }
 
   static async getActivity(): Promise<ActivityResponse> {
-    return this.request<ActivityResponse>("/api/activity")
+    return this.request<ActivityResponse>("/api/telegram/stats")
   }
 
   static async logout(): Promise<AuthResponse> {
-    return this.request<AuthResponse>("/api/auth/logout", {
+    return this.request<AuthResponse>("/api/telegram/logout", {
       method: "POST",
     })
   }
