@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 # Telegram API credentials from environment variables
-API_ID = os.getenv("TELEGRAM_API_ID")
+API_ID = int(os.getenv("TELEGRAM_API_ID"))
 API_HASH = os.getenv("TELEGRAM_API_HASH")
 
 if not API_ID or not API_HASH:
